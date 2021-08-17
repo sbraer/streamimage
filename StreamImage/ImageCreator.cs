@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using Microsoft.IO;
+using SkiaSharp;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -31,15 +32,17 @@ namespace StreamImage
         const string FONT_NAME = "Tahoma"; // <- Check if exist in destination
 
         private readonly IHelper _helper;
-        private readonly SKPaint _textPaint;
+		private readonly RecyclableMemoryStreamManager _memoryStreamManager;
+		private readonly SKPaint _textPaint;
         private readonly SKPaint _circlePaint;
         private readonly SKPaint _linePaint;
 
         private ImageCreator() => throw new NotSupportedException();
 
-        public ImageCreator(in IHelper helper)
+        public ImageCreator(in IHelper helper, RecyclableMemoryStreamManager memoryStreamManager)
         {
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
+			_memoryStreamManager = memoryStreamManager ?? throw new ArgumentNullException(nameof(memoryStreamManager));
 
             _textPaint = new SKPaint
             {
@@ -87,7 +90,7 @@ namespace StreamImage
 
             using SKImage image = surface.Snapshot();
             using SKData data = image.Encode(SKEncodedImageFormat.Jpeg, 80);
-            return new MemoryStream(data.ToArray());
+            return _memoryStreamManager.GetStream(data.ToArray());
         }
 
         private void DrawText(in SKCanvas canvas, in string text)

@@ -3,6 +3,7 @@ using log4net.Appender;
 using log4net.Config;
 using log4net.Core;
 using log4net.Repository.Hierarchy;
+using Microsoft.IO;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -22,8 +23,9 @@ namespace StreamImage
                 XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
                 Log4NetChangeThresholdInDebug();
 
+                var memoryStreamManager = new RecyclableMemoryStreamManager();
                 IHelper helper = new Helper();
-                using IImageCreator img = new ImageCreator(helper);
+                using IImageCreator img = new ImageCreator(helper, memoryStreamManager);
                 ITimerService ts = new TimerService(img, helper, log);
                 _ = ts.StartTimerAsync();
                 var socket = new SocketService(ts, log);
