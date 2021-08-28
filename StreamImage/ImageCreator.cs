@@ -39,7 +39,7 @@ namespace StreamImage
 
         private ImageCreator() => throw new NotSupportedException();
 
-        public ImageCreator(in IHelper helper, RecyclableMemoryStreamManager memoryStreamManager)
+        public ImageCreator(in IHelper helper, in RecyclableMemoryStreamManager memoryStreamManager)
         {
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
 			_memoryStreamManager = memoryStreamManager ?? throw new ArgumentNullException(nameof(memoryStreamManager));

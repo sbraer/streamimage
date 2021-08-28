@@ -1,5 +1,6 @@
 ﻿using log4net;
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -97,14 +98,11 @@ namespace StreamImage
                 var buffer = new byte[1024];
                 int replyLength;
                 do
-                {
-                    replyLength = await client.ReadAsync(buffer, 0, buffer.Length);
-                    _log.Info($"Reply: {replyLength}");
-                    if (replyLength > 0)
-                    {
-                        _log.Debug(Encoding.ASCII.GetString(buffer, 0, replyLength));
-                    }
-                } while (replyLength != 0);
+				{
+					replyLength = await client.ReadAsync(buffer, 0, buffer.Length);
+					_log.Info($"Reply: {replyLength}");
+					ReplyLogDebug(buffer, replyLength);
+				} while (replyLength != 0);
 
                 _log.Info("Connection closed");
             }
@@ -120,5 +118,14 @@ namespace StreamImage
                 }
             }
         }
-    }
+
+        [Conditional("DEBUG")]
+        private void ReplyLogDebug(byte[] buffer, int replyLength)
+		{
+			if (replyLength > 0)
+			{
+				_log.Debug(Encoding.ASCII.GetString(buffer, 0, replyLength));
+			}
+		}
+	}
 }
