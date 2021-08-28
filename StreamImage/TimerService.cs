@@ -1,6 +1,7 @@
 ﻿using log4net;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace StreamImage
@@ -44,15 +45,10 @@ namespace StreamImage
                         _log.Info($"Bytes to client({clients}): {bitmap.Length}");
 
                         // https://stackoverflow.com/questions/27761852/how-do-i-await-events-in-c
-                        Delegate[] invocationList = ImageCreatorEvent.GetInvocationList();
-                        Task[] handlerTasks = new Task[invocationList.Length];
-
-                        for (int i = 0; i < invocationList.Length; i++)
-                        {
-                            handlerTasks[i] = ((Func<object, ImageCreatorEventArgs, Task>)invocationList[i])(this, new ImageCreatorEventArgs(bitmap));
-                        }
-
-                        await Task.WhenAll(handlerTasks);
+                        await Task.WhenAll(ImageCreatorEvent.GetInvocationList()
+                            .AsParallel()
+                            .Select(t => ((Func<object, ImageCreatorEventArgs, Task>)t)(this, new ImageCreatorEventArgs(bitmap)))
+                            .ToArray());
                     }
                 }
                 catch (Exception ex)
