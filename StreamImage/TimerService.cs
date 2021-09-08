@@ -1,5 +1,6 @@
 ﻿using log4net;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,9 +41,12 @@ namespace StreamImage
                 {
                     if (ImageCreatorEvent != null)
                     {
+                        var sw = new Stopwatch();
+                        sw.Start();
                         using MemoryStream bitmap = _imageCreator.CreateImage();
+                        sw.Stop();
                         clients = ImageCreatorEvent.GetInvocationList().Length;
-                        _log.Info($"Bytes to client({clients}): {bitmap.Length}");
+                        _log.Info($"Bytes to client({clients}): {bitmap.Length}. Image created in {sw.ElapsedMilliseconds}ms");
 
                         // https://stackoverflow.com/questions/27761852/how-do-i-await-events-in-c
                         await Task.WhenAll(ImageCreatorEvent.GetInvocationList()
